@@ -4,4 +4,4 @@
 
 ### ASCII Artwork of a CAT
 
-I chose to use a Cat, because I thought it could be an easy animal to recreate. 
+I chose to use a *Cat*, because I thought it could be an _easy animal_ to recreate. 
