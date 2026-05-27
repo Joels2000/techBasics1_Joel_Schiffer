@@ -1,0 +1,151 @@
+
+inventory = []
+MAX_INVENTORY = 5
+
+# I had a bug here because I spelled 'Keycard' with a capital K 
+# but everything else lowercase. Kept it because changing it broke my loop later.
+items_in_room = [
+    {"name": "Keycard", "type": "tool", "description": "A golden keycard used to unlock the cockpit."},
+    {"name": "battery", "type": "tool", "description": "A fully charged battery for the life support system."},
+    {"name": "apple", "type": "food", "description": "A fresh, red apple.", "uses": 1},
+    {"name": "note", "type": "lore", "description": "Scrawled on it: 'Turn on the power, use the keycard, take off!'"},
+    {"name": "cup", "type": "trash", "description": "An empty plastic cup."}
+]
+
+ship_powered = False
+game_running = True
+
+
+def show_room_items():
+    # Tried doing 'if not items_in_room' but it didn't make sense to me
+    if len(items_in_room) == 0: 
+        print("The room is empty. There is nothing here.")
+    else:
+        print("In this room, you see the following items:")
+        for item in items_in_room:
+            print("- " + item['name']) 
+
+def show_inventory():
+    if len(inventory) == 0:
+        print("Your inventory is completely empty.")
+    else:
+        print("Your Inventory:")
+        for item in inventory:
+            # My code kept crashing because 'battery' doesn't have a 'uses' key
+            # Fixed it by checking if it's food first
+            if item["type"] == "food":
+                print("- " + item["name"] + " (Uses left: " + str(item["uses"]) + ")")
+            else:
+                print("- " + item["name"])
+
+def pick_up():
+    if len(inventory) >= MAX_INVENTORY:
+        print("Your inventory is full! You need to drop something first.")
+        return
+
+    item_name = input("What do you want to pick up? ") 
+    
+    found_item = None
+    for item in items_in_room:
+        if item["name"] == item_name:
+            found_item = item
+            break
+
+    if found_item != None:
+        items_in_room.remove(found_item)
+        inventory.append(found_item)
+        print("You picked up the item.")
+    else:
+        print("There is no such item here.")
+
+def drop():
+    item_name = input("What do you want to drop? ")
+    
+    found_item = None
+    for item in inventory:
+        if item["name"] == item_name:
+            found_item = item
+            break
+
+    if found_item != None:
+        inventory.remove(found_item)
+        items_in_room.append(found_item)
+        print("You dropped it.")
+    else:
+        print("You don't have that in your inventory.")
+
+def examine():
+    item_name = input("What do you want to examine? ")
+    found_item = None
+    
+    # I spent 2 hours trying to search both lists at the same time
+    # In the end, I just made two separate loops
+    for item in inventory:
+        if item["name"] == item_name:
+            found_item = item
+    for item in items_in_room:
+        if item["name"] == item_name:
+            found_item = item
+
+    if found_item != None:
+        print(found_item['description'])
+    else:
+        print("You don't see any item like that.")
+
+def use():
+    # Kept getting Errors. Added global because Python didn't know 
+    # these variables existed outside the function.
+    global ship_powered, game_running
+    item_name = input("What do you want to use? ")
+    
+    found_item = None
+    for item in inventory:
+        if item["name"] == item_name:
+            found_item = item
+
+    if found_item == None:
+        print("You don't have that item.")
+        return
+
+    if found_item["name"] == "battery":
+        ship_powered = True
+        inventory.remove(found_item)
+        print("You insert the battery. The spaceship's lights flicker to life!")
+        
+    if found_item["name"] == "Keycard":
+        if ship_powered == True:
+            print("You swipe the keycard. You escaped! YOU WIN!")
+            game_running = False
+        if ship_powered == False: 
+            print("Nothing happens without power. Find an energy source first.")
+            
+    if found_item["name"] == "apple":
+        found_item["uses"] = found_item["uses"] - 1
+        print("You eat the apple. Tasty!")
+        if found_item["uses"] == 0:
+            inventory.remove(found_item)
+
+print("=== SPACESHIP ESCAPE ===")
+print("Type 'help' for a list of all commands.\n")
+
+while game_running == True:
+    print("--------------------------------------")
+    user_input = input("Enter command: ")
+    
+  
+    if user_input == "help":
+        print("Commands: look, inventory, pickup, drop, examine, use, quit")
+    if user_input == "look":
+        show_room_items()
+    if user_input == "inventory":
+        show_inventory()
+    if user_input == "pickup":
+        pick_up()
+    if user_input == "drop":
+        drop()
+    if user_input == "examine":
+        examine()
+    if user_input == "use":
+        use()
+    if user_input == "quit":
+        game_running = False
